@@ -1,0 +1,50 @@
+# This example file from a previous lecture where we ran drupal in docker compose
+# in this Assignment, change it to work with the default drupal image, and change
+# postgres to use a Swarm secret. More info in the README.md file.
+version: '3.8'
+
+services:
+
+  drupal:
+    image: drupal:9
+    ports:
+      - "8080:80"
+    volumes:
+      - drupal-modules:/var/www/html/modules
+      - drupal-profiles:/var/www/html/profiles       
+      - drupal-sites:/var/www/html/sites      
+      - drupal-themes:/var/www/html/themes
+    secrets:
+      - db_password
+      - db_name
+      - db_user
+    environment:
+      - DRUPAL_DB_HOST=postgres
+      - DRUPAL_DB_PORT=5432
+      - DRUPAL_DB_USER_FILE=/run/secrets/db_user
+      - DRUPAL_DB_PASSWORD_FILE=/run/secrets/db_password
+      - DRUPAL_DB_NAME_FILE=/run/secrets/db_name
+ 
+  postgres:
+    image: postgres:14
+    environment:
+      - POSTGRES_USER_FILE=/run/secrets/db_user
+      - POSTGRES_PASSWORD_FILE=/run/secrets/db_password
+      - POSTGRES_DB_FILE=/run/secrets/db_name
+    volumes:
+      - drupal-data:/var/lib/postgresql/data
+
+volumes:
+  drupal-data:
+  drupal-modules:
+  drupal-profiles:
+  drupal-sites:
+  drupal-themes:
+
+secrets:
+  db_password:
+    file: ./secrets/db_password.txt
+  db_name:
+    file: ./secrets/db_name.txt
+  db_user:
+    file: ./secrets/db_user.txt

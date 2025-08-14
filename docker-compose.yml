@@ -1,6 +1,3 @@
-# This example file from a previous lecture where we ran drupal in docker compose
-# in this Assignment, change it to work with the default drupal image, and change
-# postgres to use a Swarm secret. More info in the README.md file.
 version: '3.9'
 
 services:
@@ -11,28 +8,32 @@ services:
       - "8080:80"
     volumes:
       - drupal-modules:/var/www/html/modules
-      - drupal-profiles:/var/www/html/profiles       
-      - drupal-sites:/var/www/html/sites      
+      - drupal-profiles:/var/www/html/profiles
+      - drupal-sites:/var/www/html/sites
       - drupal-themes:/var/www/html/themes
     secrets:
-      - db_password
-      - db_name
-      - db_user
+      - drumpal_db_password
+      - drumpal_db_name
+      - drumpal_db_user
     environment:
       - DRUPAL_DB_HOST=postgres
       - DRUPAL_DB_PORT=5432
-      - DRUPAL_DB_USER_FILE=/run/secrets/db_user
-      - DRUPAL_DB_PASSWORD_FILE=/run/secrets/db_password
-      - DRUPAL_DB_NAME_FILE=/run/secrets/db_name
- 
+      - DRUPAL_DB_USER_FILE=/run/secrets/drumpal_db_user
+      - DRUPAL_DB_PASSWORD_FILE=/run/secrets/drumpal_db_password
+      - DRUPAL_DB_NAME_FILE=/run/secrets/drumpal_db_name
+
   postgres:
     image: postgres:14
     environment:
-      - POSTGRES_USER_FILE=/run/secrets/db_user
-      - POSTGRES_PASSWORD_FILE=/run/secrets/db_password
-      - POSTGRES_DB_FILE=/run/secrets/db_name
+      - POSTGRES_USER_FILE=/run/secrets/drumpal_db_user
+      - POSTGRES_PASSWORD_FILE=/run/secrets/drumpal_db_password
+      - POSTGRES_DB_FILE=/run/secrets/drumpal_db_name
     volumes:
       - drupal-data:/var/lib/postgresql/data
+    secrets:
+      - drumpal_db_password
+      - drumpal_db_name
+      - drumpal_db_user
 
 volumes:
   drupal-data:
@@ -42,9 +43,9 @@ volumes:
   drupal-themes:
 
 secrets:
-  db_password:
-    file: ./secrets/db_password.txt
-  db_name:
-    file: ./secrets/db_name.txt
-  db_user:
-    file: ./secrets/db_user.txt
+  drumpal_db_password:
+    external: true
+  drumpal_db_name:
+    external: true
+  drumpal_db_user:
+    external: true
